@@ -1,3 +1,3 @@
-# WrAp[p]-A-Conda
-Generates an OS X app with an Anaconda bundle inside and a configurable
-launching script.
+# Wr[App]-A-Conda
+Generates an OS X app that wraps an Anaconda bundle.  The app can be configured
+to run any binary from Anaconda's `bin` directory.

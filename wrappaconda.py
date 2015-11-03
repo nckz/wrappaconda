@@ -164,3 +164,5 @@ try:
     subprocess.check_output('./'+MINICONDA_OSX+' -b -p '+apppath+"/Contents/Resources/miniconda", shell=True)
 except:
     print "Failed to run miniconda."
+
+print apppath + " has been created."

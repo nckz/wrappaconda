@@ -29,6 +29,8 @@ parser.add_option("-n", "--name", dest='name', help="The name of this app.")
 parser.add_option("-v", "--version", dest='version', help="The version of this app.", default='0.1')
 parser.add_option("-i", "--icon", dest='icon_file', help="Icon file to be used in the bundle.")
 parser.add_option("-t", "--target", dest='target', help="The python script to be executed by the app.")
+parser.add_option("-c", "--channel", dest='channel', help="The Anaconda.org package channel.", default='defaults')
+parser.add_option("-p", "--package", dest='package', help="The package name.")
 parser.add_option("--py2", action="store_true", dest='py2', help="Icon file to be used in the bundle.")
 parser.add_option("-o", "--over-write", action="store_true", dest='overwrite', help="Overwrite existing apps. Use caution!!!")
 options, args = parser.parse_args()
@@ -49,6 +51,10 @@ if options.name == '' or options.name is None:
     sys.exit(1)
 if options.target == '' or options.target is None:
     print "The app target is a required input."
+    parser.print_help()
+    sys.exit(1)
+if options.package == '' or options.package is None:
+    print "An app package is a required input."
     parser.print_help()
     sys.exit(1)
 
@@ -72,6 +78,7 @@ AppTarget = options.target
 apppath = '/Applications/'+CFBundleName+'.app'
 id_file_path = apppath + "/Contents/Resources/wrappaconda"
 python_path = apppath + "/Contents/Resources/miniconda/bin/python"
+conda_path = apppath + "/Contents/Resources/miniconda/bin/conda"
 
 if os.path.exists(apppath):
     if options.overwrite:
@@ -164,5 +171,13 @@ try:
     subprocess.check_output('./'+MINICONDA_OSX+' -b -p '+apppath+"/Contents/Resources/miniconda", shell=True)
 except:
     print "Failed to run miniconda."
+
+# install central conda package
+try:
+    subprocess.check_output(conda_path+' install -y -c '+options.channel+' '+options.package, shell=True)
+    subprocess.check_output(conda_path+' -t -i -p -l -y', shell=True)
+except:
+    print "Failed to run conda."
+    raise
 
 print apppath + " has been created."

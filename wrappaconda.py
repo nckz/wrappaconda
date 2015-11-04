@@ -221,7 +221,7 @@ class AppAtizer(object):
             print(self._target, ' doesn\'t exist in Miniconda bin.')
             raise 
 
-if __name__ == '__main__':
+def main():
     make = AppAtizer()
     make.deleteExistingApp()
     make.buildAppSkeleton()
@@ -232,3 +232,6 @@ if __name__ == '__main__':
     make.writeInfoPList()
     make.writePkgInfo()
     print(make.appPath() + " has been created.")
+
+if __name__ == '__main__':
+    main()

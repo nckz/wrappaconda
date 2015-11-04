@@ -1,0 +1,22 @@
+package:
+  name: wrappaconda
+  version: "0.1.0"
+
+source:
+  git_rev: master
+  git_url: https://github.com/nckz/wrappaconda.git
+
+requirements:
+  build:
+    - python >=3.4
+  run:
+    - python >=3.4
+
+build:
+  number: 1
+  string: py{{ environ['CONDA_PY'] }}
+
+about:
+  home: https://github.com/nckz/wrappaconda
+  license: BSD
+  summary: "Generates an OS X app that wraps an Anaconda bundle. The app can be configured to run any binary from Anaconda's bin directory."

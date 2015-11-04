@@ -55,7 +55,7 @@ class AppAtizer(object):
         parser.add_option("-c", "--channel", dest='channel', help="The Anaconda.org package channel.", default='defaults')
         parser.add_option("-p", "--package", dest='package', help="The package name.")
         parser.add_option("--py2", action="store_true", dest='py2', help="Choose the distro python version (defaults to py3).")
-        parser.add_option("-o", "--over-write", action="store_true", dest='overwrite', help="Overwrite an existing app with the same \'name\'. Use caution!!!")
+        parser.add_option("-o", "--overwrite", action="store_true", dest='overwrite', help="Overwrite an existing app with the same \'name\'. Use caution!!!")
         options, args = parser.parse_args()
 
         try:

@@ -66,7 +66,7 @@ class AppAtizer(object):
                 assert os.path.isfile(options.icon_file)
                 assert options.icon_file.endswith(".icns")
         except:
-            parse.print_help()
+            parser.print_help()
             raise
 
         self._name = options.name

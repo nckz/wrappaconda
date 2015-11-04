@@ -103,7 +103,7 @@ class AppAtizer(object):
                         assert f.read().count(wrappaconda_name_string) > 0
                     shutil.rmtree(self._apppath)
                 except:
-                    print("The app \'"+self._apppath+"\' cannot be verified for deletion. You may have to remove it manually. Exiting...")
+                    print("The app \'"+self._apppath+"\' cannot be verified for deletion. You may have to remove it manually. Skipping...")
             else:
                 print("The app \'"+self._apppath+"\' already exists, exiting...")
 
@@ -115,7 +115,7 @@ class AppAtizer(object):
             os.mkdir(self._macos_prefix)
             os.mkdir(self._resource_prefix)
         except OSError as e:
-            if (e[0] == errno.EPERM):
+            if e.errno == errno.EPERM:
                 print("You must have root permissions to write to /Applications.")
             raise
 

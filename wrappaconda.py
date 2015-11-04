@@ -121,7 +121,7 @@ class AppAtizer(object):
 
     def copyIconFile(self):
         if self._icon_file is not None:
-            shutil.copy(self._icon_file, self._resource_prefix + self._cfbundle_icon_filename)
+            shutil.copy(self._icon_file, self._resource_prefix + '/' + self._cfbundle_icon_filename)
 
     def writeInfoPList(self):
         # http://stackoverflow.com/questions/7404792/how-to-create-mac-application-bundle-for-python-script-via-python
@@ -131,6 +131,7 @@ class AppAtizer(object):
         CFBundleGetInfoString = CFBundleName + " " + CFBundleVersion
         CFBundleShortVersionString = CFBundleGetInfoString
         CFBundleIdentifier = "com.gpilab."+CFBundleName
+        CFBundleExecutable = self._target
 
         info_plist = """<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -139,7 +140,7 @@ class AppAtizer(object):
     <key>CFBundleDevelopmentRegion</key>
     <string>English</string>
     <key>CFBundleExecutable</key>
-    <string>main.py</string>
+    <string>%s</string>
     <key>CFBundleGetInfoString</key>
     <string>%s</string>
     <key>CFBundleIconFile</key>
@@ -168,7 +169,7 @@ class AppAtizer(object):
 </plist>
 """
         with open(self._info_plist_path, "w") as f:
-            f.write(info_plist % (CFBundleGetInfoString, CFBundleIconFile, CFBundleIdentifier, CFBundleName, CFBundleShortVersionString, CFBundleVersion))
+            f.write(info_plist % (CFBundleExecutable, CFBundleGetInfoString, CFBundleIconFile, CFBundleIdentifier, CFBundleName, CFBundleShortVersionString, CFBundleVersion))
 
     def writePkgInfo(self):
         with open(self._pkg_info_path, "w") as f:
@@ -211,13 +212,23 @@ class AppAtizer(object):
                 print("Failed to run conda.")
                 raise
 
+    def linkTarget(self):
+        # check for the existence of the target
+        try:
+            assert os.path.isfile(self._miniconda_prefix + '/bin/' + self._target)
+            os.link(self._miniconda_prefix + '/bin/' + self._target, self._macos_prefix + '/' + self._target)
+        except:
+            print(self._target, ' doesn\'t exist in Miniconda bin.')
+            raise 
+
 if __name__ == '__main__':
     make = AppAtizer()
     make.deleteExistingApp()
     make.buildAppSkeleton()
     make.writeWrappacondaIDFile()
     make.copyIconFile()
-    make.writePkgInfo()
     make.setupMiniconda()
+    make.linkTarget()
     make.writeInfoPList()
+    make.writePkgInfo()
     print(make.appPath() + " has been created.")

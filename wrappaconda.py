@@ -15,17 +15,19 @@ import subprocess
 
 wrappaconda_name_string = 'Wr[App]-A-Conda'
 
-#with open(apppath + "/Contents/MacOS/main.py", "w") as f, open(AppTarget, "r") as t:
-#    hdr_shebang = "#!"+ python_path + "\n"
-#    f.write(hdr_shebang + t.read())
-#oldmode = os.stat(apppath + "/Contents/MacOS/main.py").st_mode
-#os.chmod(apppath + "/Contents/MacOS/main.py", oldmode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-
-
 class AppAtizer(object):
 
     def __init__(self):
+
+        # tmp paths
+        self._downloads_prefix = os.path.expanduser('~/Downloads')
+        if not os.path.isdir(self._downloads_prefix):
+            self._downloads_prefix = './' # use cwd
+
+        # try for wget or curl
         self._get = self._getDownloaderCommand()
+
+        # cli input
         self._parseUserInput()
 
         # .app paths
@@ -44,6 +46,7 @@ class AppAtizer(object):
         self._miniconda_prefix = self._resource_prefix + "/miniconda"
         self._python_path = self._miniconda_prefix + "/bin/python"
         self._conda_path = self._miniconda_prefix + "/bin/conda"
+
 
     def _parseUserInput(self):
         # get user input
@@ -82,11 +85,11 @@ class AppAtizer(object):
         # check for installed utilities
         try:
             subprocess.check_output('command -v wget >/dev/null 2>&1;', shell=True)
-            return 'wget -c '
+            return 'wget --directory-prefix ' + self._downloads_prefix + ' -c {}'
         except:
             try:
                 subprocess.check_output('command -v curl >/dev/null 2>&1;', shell=True)
-                return 'curl -O -C - '
+                return 'cd '+self._downloads_prefix+' && curl --fail -O -C - {} '
             except:
                 print("This script requires \'wget\' or \'curl\' and neither were found.")
                 raise
@@ -190,14 +193,18 @@ class AppAtizer(object):
 
         # download miniconda
         try:
-            subprocess.check_output(self._get+MINICONDA_WEB+MINICONDA_OSX, shell=True)
+            cmd = self._get.format(MINICONDA_WEB+MINICONDA_OSX)
+            print(cmd)
+            subprocess.check_output(cmd, shell=True)
         except:
             print("Failed to download miniconda.")
 
         # install miniconda
         try:
-            os.chmod('./'+MINICONDA_OSX, 0o777)
-            subprocess.check_output('./'+MINICONDA_OSX+' -b -p '+self._miniconda_prefix, shell=True)
+            os.chmod(self._downloads_prefix+'/'+MINICONDA_OSX, 0o777)
+            cmd = self._downloads_prefix+'/'+MINICONDA_OSX+' -b -p '+self._miniconda_prefix
+            print(cmd)
+            subprocess.check_output(cmd, shell=True)
         except:
             print("Failed to run miniconda.")
 
@@ -222,16 +229,19 @@ class AppAtizer(object):
             raise 
 
 def main():
-    make = AppAtizer()
-    make.deleteExistingApp()
-    make.buildAppSkeleton()
-    make.writeWrappacondaIDFile()
-    make.copyIconFile()
-    make.setupMiniconda()
-    make.linkTarget()
-    make.writeInfoPList()
-    make.writePkgInfo()
-    print(make.appPath() + " has been created.")
+    try:
+        make = AppAtizer()
+        make.deleteExistingApp()
+        make.buildAppSkeleton()
+        make.writeWrappacondaIDFile()
+        make.copyIconFile()
+        make.setupMiniconda()
+        make.linkTarget()
+        make.writeInfoPList()
+        make.writePkgInfo()
+        print(make.appPath() + " has been created.")
+    except:
+        print('Failed.')
 
 if __name__ == '__main__':
     main()

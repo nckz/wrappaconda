@@ -56,7 +56,7 @@ class AppAtizer(object):
         parser.add_option("-i", "--icon", dest='icon_file', help="Icon file to be used in the bundle.")
         parser.add_option("-t", "--target", dest='target', help="The binary or script found in Anaconda\'s $PREFIX/bin. (REQUIRED)")
         parser.add_option("-c", "--channel", dest='channel', help="The Anaconda.org package channel.", default='defaults')
-        parser.add_option("-p", "--package", dest='package', help="The package name.")
+        parser.add_option("-p", "--package", dest='package', help="The package name(s) separated by commas (e.g. scipy=0.15.0,curl=7.26.0,pip).")
         parser.add_option("--py2", action="store_true", dest='py2', help="Choose the distro python version (defaults to py3).")
         parser.add_option("-o", "--overwrite", action="store_true", dest='overwrite', help="Overwrite an existing app with the same \'name\'. Use caution!!!")
         options, args = parser.parse_args()
@@ -211,7 +211,7 @@ class AppAtizer(object):
         # install central conda package
         if self._package:
             try:
-                conda_cmd = self._conda_path+' install -y -c '+self._channel+' '+self._package
+                conda_cmd = self._conda_path+' install -y -c '+self._channel+' '+' '.join(self._package.split(','))
                 print(conda_cmd)
                 subprocess.check_output(conda_cmd, shell=True)
                 subprocess.check_output(self._conda_path+' clean -t -i -p -l -y', shell=True)

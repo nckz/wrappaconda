@@ -51,11 +51,11 @@ class AppAtizer(object):
     def _parseUserInput(self):
         # get user input
         parser = optparse.OptionParser()
-        parser.add_option("-n", "--name", dest='name', help="The name of this app. (REQUIRED)")
+        parser.add_option("-n", "--name", dest='name', help="[REQUIRED] The name of this app.")
+        parser.add_option("-t", "--target", dest='target', help="[REQUIRED] The binary or script found in Anaconda\'s $PREFIX/bin.")
         parser.add_option("-v", "--version", dest='version', help="The version of this app.", default='0.1')
         parser.add_option("-i", "--icon", dest='icon_file', help="Icon file to be used in the bundle.")
-        parser.add_option("-t", "--target", dest='target', help="The binary or script found in Anaconda\'s $PREFIX/bin. (REQUIRED)")
-        parser.add_option("-c", "--channel", dest='channel', help="The Anaconda.org package channel.", default='defaults')
+        parser.add_option("-c", "--channel", dest='channel', help="The Anaconda.org package channel(s), or url(s) separated by commas (e.g. nckz,https://conda.anaconda.org/gpi/channel/rc) (defaults to \'defaults\')", default='defaults')
         parser.add_option("-p", "--package", dest='package', help="The package name(s) separated by commas (e.g. scipy=0.15.0,curl=7.26.0,pip).")
         parser.add_option("--py2", action="store_true", dest='py2', help="Choose the distro python version (defaults to py3).")
         parser.add_option("-o", "--overwrite", action="store_true", dest='overwrite', help="Overwrite an existing app with the same \'name\'. Use caution!!!")
@@ -211,7 +211,7 @@ class AppAtizer(object):
         # install central conda package
         if self._package:
             try:
-                conda_cmd = self._conda_path+' install -y -c '+self._channel+' '+' '.join(self._package.split(','))
+                conda_cmd = self._conda_path+' install -y -c '+' -c '.join(self._channel.split(','))+' '+' '.join(self._package.split(','))
                 print(conda_cmd)
                 subprocess.check_output(conda_cmd, shell=True)
                 subprocess.check_output(self._conda_path+' clean -t -i -p -l -y', shell=True)
@@ -229,19 +229,16 @@ class AppAtizer(object):
             raise 
 
 def main():
-    try:
-        make = AppAtizer()
-        make.deleteExistingApp()
-        make.buildAppSkeleton()
-        make.writeWrappacondaIDFile()
-        make.copyIconFile()
-        make.setupMiniconda()
-        make.linkTarget()
-        make.writeInfoPList()
-        make.writePkgInfo()
-        print(make.appPath() + " has been created.")
-    except:
-        print('Failed.')
+    make = AppAtizer()
+    make.deleteExistingApp()
+    make.buildAppSkeleton()
+    make.writeWrappacondaIDFile()
+    make.copyIconFile()
+    make.setupMiniconda()
+    make.linkTarget()
+    make.writeInfoPList()
+    make.writePkgInfo()
+    print(make.appPath() + " has been created.")
 
 if __name__ == '__main__':
     main()

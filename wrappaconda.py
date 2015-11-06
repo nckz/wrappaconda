@@ -57,6 +57,7 @@ class AppAtizer(object):
         parser.add_option("-i", "--icon", dest='icon_file', help="Icon file to be used in the bundle.")
         parser.add_option("-c", "--channel", dest='channel', help="The Anaconda.org package channel(s), or url(s) separated by commas (e.g. nckz,https://conda.anaconda.org/gpi/channel/rc) (defaults to \'defaults\')", default='defaults')
         parser.add_option("-p", "--package", dest='package', help="The package name(s) separated by commas (e.g. scipy=0.15.0,curl=7.26.0,pip).")
+        parser.add_option("-r", "--rootenv", dest='rootenv', help="A root environment file (created using: \'conda list --export\').")
         parser.add_option("--py2", action="store_true", dest='py2', help="Choose the distro python version (defaults to py3).")
         parser.add_option("-o", "--overwrite", action="store_true", dest='overwrite', help="Overwrite an existing app with the same \'name\'. Use caution!!!")
         options, args = parser.parse_args()
@@ -68,6 +69,8 @@ class AppAtizer(object):
             if options.icon_file is not None:
                 assert os.path.isfile(options.icon_file)
                 assert options.icon_file.endswith(".icns")
+            if options.rootenv is not None:
+                assert os.path.isfile(options.rootenv)
         except:
             parser.print_help()
             raise
@@ -78,6 +81,7 @@ class AppAtizer(object):
         self._icon_file = options.icon_file
         self._channel = options.channel
         self._package = options.package
+        self._root_env = options.rootenv
         self._use_py2 = options.py2
         self._overwrite = options.overwrite
 
@@ -212,6 +216,8 @@ class AppAtizer(object):
         if self._package:
             try:
                 conda_cmd = self._conda_path+' install -y -c '+' -c '.join(self._channel.split(','))+' '+' '.join(self._package.split(','))
+                if self._root_env:
+                    conda_cmd += ' --file '+self._root_env
                 print(conda_cmd)
                 subprocess.check_output(conda_cmd, shell=True)
                 subprocess.check_output(self._conda_path+' clean -t -i -p -l -y', shell=True)

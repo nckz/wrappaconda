@@ -58,7 +58,7 @@ class AppAtizer(object):
         parser.add_option("-c", "--channel", dest='channel', help="The Anaconda.org package channel(s), or url(s) separated by commas (e.g. nckz,https://conda.anaconda.org/gpi/channel/rc) (defaults to \'defaults\')", default='defaults')
         parser.add_option("-p", "--package", dest='package', help="The package name(s) separated by commas (e.g. scipy=0.15.0,curl=7.26.0,pip).")
         parser.add_option("-r", "--rootenv", dest='rootenv', help="A root environment file (created using: \'conda list --export\').")
-        parser.add_option("--py2", action="store_true", dest='py2', help="Choose the distro python version (defaults to py3).")
+        parser.add_option("--py", dest='py_ver', help="Choose the distro python version using the major and minor version numbers (defaults to 3.5).", default='3.5')
         parser.add_option("-o", "--overwrite", action="store_true", dest='overwrite', help="Overwrite an existing app with the same \'name\'. Use caution!!!")
         options, args = parser.parse_args()
 
@@ -82,7 +82,7 @@ class AppAtizer(object):
         self._channel = options.channel
         self._package = options.package
         self._root_env = options.rootenv
-        self._use_py2 = options.py2
+        self._py_ver = options.py_ver
         self._overwrite = options.overwrite
 
     def _getDownloaderCommand(self):
@@ -190,7 +190,7 @@ class AppAtizer(object):
         # anaconda website and miniconda package info
         #   -python 3 is the default miniconda
         MINICONDA_NAME='Miniconda3'
-        if self._use_py2:
+        if float(self._py_ver) < 3:
             MINICONDA_NAME='Miniconda'
         MINICONDA_WEB='https://repo.continuum.io/miniconda/'
         MINICONDA_OSX=MINICONDA_NAME+'-latest-MacOSX-x86_64.sh'
@@ -215,7 +215,8 @@ class AppAtizer(object):
         # install central conda package
         if self._package:
             try:
-                conda_cmd = self._conda_path+' install -y -c '+' -c '.join(self._channel.split(','))+' '+' '.join(self._package.split(','))
+                python = ' python=='+self._py_ver+' '
+                conda_cmd = self._conda_path+' install -y -c '+' -c '.join(self._channel.split(','))+' '+' '.join(self._package.split(',')) + python
                 if self._root_env:
                     conda_cmd += ' --file '+self._root_env
                 print(conda_cmd)
